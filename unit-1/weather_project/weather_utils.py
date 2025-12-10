@@ -36,15 +36,11 @@ def convert_to_df(data): # Raw json → pd dataframe
     df = pd.DataFrame(records)
     return df
 
-df = convert_to_df(get_weather("Ho Chi Minh City"))
-df.to_csv("test_data.csv")
-
 def filter_by_date(df,start,end): # Filter df by a datetime range
     mask = (df["datetime"] >= start) & (df["datetime"] <= end)
     return df.loc[mask] # Return row(s) in start/end range
 
-df_filtered = filter_by_date(df, datetime(2025,12,4,0,0,0), datetime(2025,12,5,18,0,0))
-df_filtered.to_csv("filtered_data.csv")
+#! Change this everytime ↓
 
 def compute_stats(df, metric):
     max_val = df[metric].max()
@@ -63,6 +59,3 @@ def compute_stats(df, metric):
         "max_time": max_time,
         "min_time": min_time,
     }
-
-print(compute_stats(df, "temp"))
-print(compute_stats(df_filtered, "temp"))
