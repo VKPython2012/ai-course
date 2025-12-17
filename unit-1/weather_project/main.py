@@ -36,7 +36,7 @@ app.layout = html.Div([
         "display":"inline-block"
     }),
 
-    html.Button("Load Data", id="lead-btn", style={"marginLeft": "20px"}, n_clicks=0),
+    html.Button("Load Data", id="load-btn", style={"marginLeft": "20px"}, n_clicks=0),
 
     html.Hr(),
 
@@ -68,9 +68,43 @@ app.layout = html.Div([
     State("city-dropdown", "value")
 )
 def update_weather(n, city):
-    pass
+    if n == 0:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    raw_data = wu.get_weather(city)
+    df = wu.convert_to_df(raw_data)
 
+    # Create indivual charts
+    temp_fig = px.line(
+        df, x="datetime", y="temp",
+        title=f"{city} - Temperature",
+        labels={"datetime": "Date/Time", "temp": "Temperature (°C)"}
+    )
 
+    humidity_fig = px.line(
+        df, x="datetime", y="humidity",
+        title=f"{city} - Humidity",
+        labels={"datetime": "Date/Time", "humidity": "Humidity (%)"}
+    )
+
+    wind_fig = px.line(
+        df, x="datetime", y="wind",
+        title=f"{city} - Wind Speed",
+        labels={"datetime": "Date/Time", "wind": "Wind Speed (m/s)"}
+    )
+
+    # Compute stats 
+    stats_txt=""
+    for label,metric in METRIC.items():
+        stats = wu.compute_stats(df, metric)
+        stats_txt += (
+            f"{label}\n" 
+            f"Max: {stats["max"]} at {stats["max_time"]}\n"
+            f"Min: {stats["min"]} at {stats["min_time"]}\n"
+            f"Avg: {stats["mean"]}\n"
+            f"Perentage Change: {stats["percent_change"]}%\n\n"
+        )
+
+    return temp_fig, wind_fig, humidity_fig, stats_txt
 
 ### App Execution ###
 if __name__ == "__main__":
